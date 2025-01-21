@@ -34,7 +34,7 @@ Registers a new user in the system.
   "fullName": "John Doe",
   "email": "john.doe@example.com",
   "linkedinUrl": "https://linkedin.com/in/johndoe",
-  "channel": "tech",
+  "channel": "cloud",
   "comments": "Interested in DevOps",
   "slackUsername": "johndoe123"
 }
