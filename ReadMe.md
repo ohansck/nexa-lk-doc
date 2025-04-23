@@ -1,56 +1,62 @@
-# User Story: User Management
+# User Service Lambda
 
-## Title
+A simple AWS Lambda + DynamoDB service for managing user records.
 
-As a user, I want to manage my profile so that I can keep my information up to date.
+## 📦 Features
 
-## Acceptance Criteria
+- Create, update, fetch by ID
+- Query by GSI (email, channel, createdAt)
+- Paginated list of all users
+- Delete user
+- Automatic country detection via CloudFront header
 
-### 1. Register a User
+## 🚀 Prerequisites
 
-- **Endpoint:** `POST /users`
-- **Request:**
-  - Full name, email, LinkedIn URL, channel, comments, and Slack username.
-- **Response:**
-  - Success message upon successful registration.
-  - Error message if registration fails.
+- Node.js ≥ 14
+- AWS account & IAM user with DynamoDB and Lambda permissions
+- Serverless Framework or AWS SAM (optional)
 
-### 2. Update User Information
+## 🔧 Environment Variables
 
-- **Endpoint:** `PUT /users`
-- **Request:**
-  - User ID and updated fields (full name, email, etc.).
-- **Response:**
-  - Success message on update.
-  - Error message if update fails.
+- **USERS_TABLE**: DynamoDB table name for user records
 
-### 3. Get All Users (Paginated)
 
-- **Endpoint:** `GET /users`
-- **Request:**
-  - Optional `lastEvaluatedKey` for pagination.
-- **Response:**
-  - List of users with pagination support.
+## 📡 API Endpoints
 
-### 4. Get Users by Attribute
+**Base URL:** `https://{api-id}.execute-api.{region}.amazonaws.com/{stage}`
 
-- **Endpoint:** `GET /user`
-- **Request:**
-  - Query by email, createdAt, or channel.
-- **Response:**
-  - List of matching users.
+| Method | Path               | Description                     | Body / Query                                                   |
+| ------ | ------------------ | ------------------------------- | -------------------------------------------------------------- |
+| POST   | `/users/create`    | Create a new user               | JSON with `fullName`, `email`, `linkedinUrl`, `slackUsername?`, `channel` |
+| PUT    | `/users/update`    | Update an existing user         | JSON with `id`, `fullName?`, `email?`, `linkedinUrl?`          |
+| GET    | `/users`           | Get user by ID                  | Query: `?id={userId}`                                          |
+| GET    | `/users/by-index`  | Query users by GSI              | Query: `?index={email|channel|createdAt}&value={searchValue}`  |
+| POST   | `/users/all`       | Paginated scan of all users     | JSON: `{ limit?: number, lastEvaluatedKey?: object }`          |
+| DELETE | `/users`           | Delete by ID                    | Query: `?id={userId}`                                          |
 
-### 5. Delete a User
+## 📝 Data Model
 
-- **Endpoint:** `DELETE /users`
-- **Request:**
-  - User ID as a query parameter.
-- **Response:**
-  - Success message on deletion.
-  - Error message if deletion fails.
+DynamoDB item in **USERS_TABLE**:
 
-## Notes
+```json
+{
+  "id": "uuid",
+  "fullName": "string",
+  "email": "string",
+  "linkedinUrl": "string",
+  "slackUsername": "string",
+  "channel": "string",
+  "country": "string",
+  "comments": "string",
+  "createdAt": "ISO8601 timestamp",
+  "updatedAt": "ISO8601 timestamp"
+}
+```
 
-- All requests and responses must be in JSON format.
-- Ensure proper error handling and validations on the frontend.
-- Use provided API documentation for detailed field descriptions.
+
+## 🐛 Troubleshooting
+
+- **400**: Bad request (missing/invalid parameters)
+- **404**: Not found (e.g., user ID does not exist)
+- **500**: Internal server error (check CloudWatch logs)
+
